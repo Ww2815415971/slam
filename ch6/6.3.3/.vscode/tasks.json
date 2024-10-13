@@ -1,0 +1,24 @@
+{
+    
+    "tasks": [
+        {
+            
+            "label": "CMake: Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build"
+            ],
+            "group":{
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "调试器生成的任务。"
+        }
+    ],
+    "version": "2.0.0"
+}
