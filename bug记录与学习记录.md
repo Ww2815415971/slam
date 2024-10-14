@@ -93,6 +93,12 @@ In file included from /home/steven/slam/slambook/ch3/main.cpp:2:
     separate development package or SDK, be sure it has been installed.
 - 解决方案
     - 找到EGL的路径在/usr/include/EGL
+#### 报错4
+     异常关闭挂起的ubuntu导致无法识别ens33 网卡
+  解决方案 
+-     sudo systemctl stop NetworkManager
+-     sudo rm /var/lib/NetworkManager/NetworkManager.state
+-     sudo systemctl start NetworkManager
 ### 提问：为什么链接Pangolin库和连接Eigen 库的语句不一样
 
 解答：不同的库之所以会有不同的连接方式。这主要取决于库的 CMake 配置文件（通常是 find_package 模块）是如何定义和导出库的编译和链接信息的
