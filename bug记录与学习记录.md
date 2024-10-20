@@ -156,3 +156,12 @@ In file included from /home/steven/slam/slambook/ch3/main.cpp:2:
 
   对应不同李群的正切空间，描述李群的局部导数
   记作se(3)和so(3)
+ ## ubuntu常见网络报错
+ - 无法显示网络图标
+   由于异常关闭虚拟机，导致系统无法识别网卡，从而导致出现没有网络图标的情况
+ - 解决方案
+    ```sh
+    sudo systemctl stop NetworkManager
+sudo rm /var/lib/NetworkManager/NetworkManager.state
+sudo systemctl start NetworkManager
+    ```

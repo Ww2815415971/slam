@@ -8,8 +8,8 @@ using namespace std;
 using namespace cv;
 int main()
 {
-    Mat img_1 = imread("/home/steven/slam/slambook/ch7/images/1.png",IMREAD_COLOR);
-    Mat img_2 = imread("/home/steven/slam/slambook/ch7/images/2.png",IMREAD_COLOR);//以彩色形式读取图片
+    Mat img_1 = imread("/home/steven/slam/slambook/ch7/7.1/images/1.png",IMREAD_COLOR);
+    Mat img_2 = imread("/home/steven/slam/slambook/ch7/7.1/images/2.png",IMREAD_COLOR);//以彩色形式读取图片
     assert(img_1.data != nullptr&& img_2.data != nullptr);//断言去判断是否读取到图片
     // 初始化
     std ::vector<KeyPoint> keypoint_1,keypoint_2;// 定义角点
