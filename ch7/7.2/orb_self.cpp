@@ -6,7 +6,7 @@
 
 using namespace std;
 string first_file= "/home/steven/slam/slambook/ch7/7.1/images/1.png";
-string second_file= "/home/steven/slam/slambook/ch7/7.1//images/1.png";
+string second_file= "/home/steven/slam/slambook/ch7/7.1//images/2.png";
 typedef vector<uint32_t> DescType;
 void ComputeORB(const cv::Mat &img,vector<cv::KeyPoint> &keypoints,vector<DescType> &descriptors);
 void BfMatch(const vector<DescType> &desc1,const vector<DescType> & desc2,vector<cv::DMatch> &matches);
@@ -366,7 +366,7 @@ void ComputeORB(const cv::Mat &img, vector<cv::KeyPoint> &keypoints, vector<Desc
 void BfMatch(const vector<DescType> &desc1, const vector<DescType> &desc2, vector<cv::DMatch> &matches) {
   const int d_max = 40;
 
-  for (size_t i1 = 0; i1 < desc1.size(); ++i1) {
+  for (int i1 = 0; i1 < desc1.size(); ++i1) {
     if (desc1[i1].empty()) continue;
     cv::DMatch m{i1, 0, 256};
     for (size_t i2 = 0; i2 < desc2.size(); ++i2) {
