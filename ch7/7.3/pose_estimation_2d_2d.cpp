@@ -50,7 +50,9 @@ int main()
     cout << "t^R=" <<endl <<t_x * R <<endl;
 
 // 验证对极约束
-    Mat K = (Mat_<double>(3,3) << 520.9 ,0, 325.1, 0,521.0,249.7, 0,0,1);
+    Mat K = (Mat_<double>(3,3) << 520.9 ,0, 325.1,
+                                 0,521.0,249.7,
+                                0,0,1);
 // 利用Mat_<double>(3,3)创建一个3*3的矩阵，并通过 << 来赋值
     for(DMatch m:matches)// 遍历匹配子
     {   
@@ -75,7 +77,8 @@ int main()
     return 0;
 }
 void find_feature_matches(const Mat &img_1,const Mat & img_2, 
-std::vector<KeyPoint> &keypoints_1,std::vector<KeyPoint> &keypoints_2, DMatch & matches)
+std::vector<KeyPoint> &keypoints_1,
+std::vector<KeyPoint> &keypoints_2, std::vector<DMatch> & matches)
 {
     // 初始化
     // Mat与Ptr  
@@ -106,8 +109,94 @@ std::vector<KeyPoint> &keypoints_1,std::vector<KeyPoint> &keypoints_2, DMatch & 
    matcher->match(descriptors_1,descriptors_2,match);
 
    // 匹配点对筛选
-
+    //类似与比大小，找到int中的最大值和最小值进行比较找到里面的最值
    double min_dist = 10000,max_dist = 0;
    
+   for(int i = 0; i < descriptors_1.rows; i++)
+   {
+    double dist = match[i].distance;
+    if(dist <min_dist) min_dist=dist;
+    if(dist >max_dist) max_dist= dist;
+   }
+
+   printf("-- Max dist:%f\n",max_dist);
+   printf("-- Min dist:%f\n", min_dist);
+
+   //当描述子之间的距离大于二倍的最小距离,认为匹配有误，最小值小于30时
+   for(int i = 0;i <descriptors_1.rows;i ++)
+   {
+    if(match[i].distance <= max(2*min_dist,30.0))
+    {
+        matches.push_back(match[i]);
+    }
+   }
 }
+
+//像素坐标转相机归一化坐标
+                    //2d坐标             相机的外参矩阵
+Point2d pixel2cam(const Point2d &p, const Mat &K)
+{       
+    Point2d p1(p.x - K.at<double>(0,2) / K.at<double>(0,0),
+    (p.y - K.at<double>(1,2) / K.at<double>(1,1)));
+    
+    // px-cx/fx
+    // py-cy/fy
+
+    /*
+        {
+        fx 0 cx
+    K=  0 fy cy  
+        0 0 1  
+        }
+ 
+
+    */
+    return p1;
+}
+
+void pose_estimation_2d2d(std::vector<KeyPoint>keypoints_1,
+std::vector<KeyPoint>keypoints_2,
+std::vector<DMatch> matches,
+Mat &R, Mat &t)
+{
+    // 相机内参
+    Mat K = (Mat_<double>(3,3) << 520.9 ,0, 325.1,
+                                 0,521.0,249.7,
+                                0,0,1);
+    //将匹配点转换成 vector<Point2f>
+    vector<Point2f> points1;
+    vector<Point2f> points2;
+    for (int  i = 0; i < (int)matches.size(); i++)
+    {
+        points1.push_back(keypoints_1[matches[i].queryIdx].pt);
+        points2.push_back(keypoints_2[matches[i].trainIdx].pt);
+
+    }
+    // -- 计算基础矩阵
+    Mat fundamental_matrix;
+    fundamental_matrix =findFundamentalMat(points1,points2,CV_FM_8POINT);
+    cout << "fundamental_matrix is "<< endl <<fundamental_matrix<<endl;
+
+
+    // -- 计算本质矩阵
+    Point2d principal_point(325.1,249.7); //相机光心
+    double focal_length = 521; // 焦距 TUM dataset标定值
+    Mat essential_matrix;
+    essential_matrix = findEssentialMat(points1,points2,focal_length,principal_point);
+    cout <<"essential_matrix is "<< endl <<essential_matrix<<endl;
+    
+
+    // == 计算单应矩阵
+    Mat homography_matrix;
+    homography_matrix = findHomography(points1,points1,RANSAC,3);
+    cout <<"homography_matrix is "<< endl<<homography_matrix<<endl;
+
+    //从本质矩阵中恢复旋转和平移信息
+    // 此函数只在Opencv3中提供
+    recoverPose(essential_matrix,points1,points2,R,t,focal_length,principal_point);
+     cout << "R is " << endl << R << endl;
+     cout << "t is " << endl << t << endl;
+
+}
+
 
