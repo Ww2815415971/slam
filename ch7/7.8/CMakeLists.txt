@@ -24,7 +24,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")# 必须
 # find_package(G2O REQUIRED)# 菲必须
 #message(STATUS "G2O_INCLUDE_DIRS: ${G2O_INCLUDE_DIRS}")
 
-link_directories("/usr/local/g2o/lib")# 最重要的一句
+link_directories("/usr/local/g2o/lib")# 最重要的一句指定编译器去指定目录寻找，用来解决
 
 add_executable(pnp pnp.cpp)
 # target_link_libraries(pnp ${OpenCV_LIBS} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} )
