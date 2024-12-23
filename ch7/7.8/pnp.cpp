@@ -53,6 +53,7 @@ int main()
     vector<Point2f> pts_2d;
     for (DMatch m:matches)
     {
+        // 获取对应的深度值
         ushort d = d1.ptr<unsigned short> (int (keypoints_1[m.queryIdx].pt.y))[int(keypoints_1[m.queryIdx].pt.x)];
         if (d == 0)
         continue;
@@ -66,7 +67,7 @@ int main()
 
     chrono::steady_clock::time_point t1 = chrono::steady_clock::now();
     Mat r,t;
-    solvePnP(pts_3d,pts_2d,K,Mat(),r,t,false);// 调用OpenCV的 PnP 求解，可选择EPNP DLS等方法
+    solvePnP(pts_3d,pts_2d,K,Mat(),r,t,false);// 调用OpenCV的 PnP 求解，从3d到2d进行投影获取三地点，可选择EPNP DLS等方法
 
     Mat R;
     cv::Rodrigues(r, R); // r为旋转向量形式，用Rodrigues转换成矩阵
