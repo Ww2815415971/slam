@@ -30,10 +30,11 @@ void bundleAdjustmentG2O(
     const VecVector2d &points_2d,
     const Mat &K,
     Sophus::SE3d &pose 
-);
+);// G2O 优化位姿
+// 重投影误差去优化
 void bundleAdjustmentGaussNewton(
-    const VecVector2d &points_3d,
-    const VecVector3d &points_2d,
+    const VecVector3d &points_3d,
+    const VecVector2d &points_2d,
     const Mat &K,
     Sophus::SE3d &pose
 );
@@ -45,12 +46,12 @@ int main()
 
     vector<KeyPoint> keypoints_1,keypoints_2;  // 关键点 图像中的特征点
     vector<DMatch>matches; // 匹配的结果
-    find_feature_matches(img1,img2,keypoints_1,keypoints_2,matches);
+    find_feature_matches(img1,img2,keypoints_1,keypoints_2,matches);//特征点提取
 
     Mat d1 = imread("../images/1_depth.png",CV_LOAD_IMAGE_UNCHANGED); // 深度图为16位无符号数，单通道图像
-    Mat K = (Mat_<double>(3, 3) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1);
-    vector<Point3f> pts_3d;
-    vector<Point2f> pts_2d;
+    Mat K = (Mat_<double>(3, 3) << 520.9, 0, 325.1, 0, 521.0, 249.7, 0, 0, 1);// 内参矩阵
+    vector<Point3f> pts_3d;// 3d矩阵
+    vector<Point2f> pts_2d;// 2d矩阵
     for (DMatch m:matches)
     {
         // 获取对应的深度值
@@ -58,9 +59,9 @@ int main()
         if (d == 0)
         continue;
         float dd = d/5000.0;
-        Point2d p1 = pixel2cam(keypoints_1[m.queryIdx].pt,K);
-        pts_3d.push_back(Point3f(p1.x * dd, p1.y * dd,dd));
-        pts_2d.push_back(keypoints_2[m.trainIdx].pt);
+        Point2d p1 = pixel2cam(keypoints_1[m.queryIdx].pt,K);// 将像素坐标转化成归一化坐标
+        pts_3d.push_back(Point3f(p1.x * dd, p1.y * dd,dd));// 将3d点数据融合并归一化存入3d点集合
+        pts_2d.push_back(keypoints_2[m.trainIdx].pt);// 将2d点存入2d点集合
 
     }
     cout << "3d-2d pairs:" << pts_3d.size() << endl;
@@ -88,7 +89,7 @@ int main()
     cout <<"calling bundle adjustment by gauss newton" << endl;
     Sophus::SE3d pose_gn;
     t1 = chrono::steady_clock::now();
-    //bundleAdjustmentGaussNewton(pts_3d_eigen,pts_2d_eigen,K,pose_gn);
+    bundleAdjustmentGaussNewton(pts_3d_eigen,pts_2d_eigen,K,pose_gn);
     t2 = chrono::steady_clock::now();
     time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
     cout << "solve pnp by gauss newton cost time: " << time_used.count() << "second"<< endl;
@@ -370,4 +371,5 @@ void bundleAdjustmentG2O(
         chrono::steady_clock::time_point t2 = chrono::steady_clock::now();
         chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
         pose = vertex_pose->estimate();
+        cout << "pose by G2O: \n" <<pose.matrix()<< endl;
 }
