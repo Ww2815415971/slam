@@ -102,9 +102,10 @@ int main()
    vector<DMatch> matches;
    find_feature_matches(img1,img2,keypoint_1,keypoint_2,matches);
    Mat depth1 =imread("../images/1_depth.png",CV_LOAD_IMAGE_UNCHANGED);
-   Mat depth2 =imread("../images/2_depth.png:,CV_LOAD_INAGE_UNCHANGED"); // 16位无符号数
+   Mat depth2 =imread("../images/2_depth.png",CV_LOAD_IMAGE_UNCHANGED); // 16位无符号数
    Mat K = (Mat_<double>(3,3) << 520.9,0,325.1,0,521.0,249.7,0,0,1);
     vector<Point3f> pts1,pts2;
+    //  从匹配子中获取深度值
     for(DMatch m:matches)
     {
         ushort d1 = depth1.ptr<unsigned short>(int (keypoint_1[m.queryIdx].pt.y))[int(keypoint_1[m.queryIdx].pt.x)];
@@ -130,6 +131,7 @@ int main()
     cout << "calling bundle adjustment" <<endl;
     bundleAdjustment(pts1,pts2,R,t);
 
+    // 验证BA结果
     for (int i = 0; i< 5; i ++)
     {
         cout << "p1 = " << pts1[i] << endl;
@@ -194,7 +196,7 @@ Point2d pixel2cam(const Point2d &p ,const Mat &K)
 void pose_estimation_3d3d(const vector<Point3f> &pts1,
 const vector<Point3f> &pts2,Mat &R, Mat &t )
 {
-    Point3f p1,p2; // 求重心
+    Point3f p1,p2; // 求质心
     int N = pts1.size();
     
     // 通过去平均值去除重心，从而减少平移对估计的影响
